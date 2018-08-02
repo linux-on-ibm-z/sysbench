@@ -1,6 +1,6 @@
 /*
 ** SINK: Allocation Sinking and Store Sinking.
-** Copyright (C) 2005-2017 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2016 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_opt_sink_c
@@ -165,8 +165,8 @@ static void sink_remark_phi(jit_State *J)
 /* Sweep instructions and tag sunken allocations and stores. */
 static void sink_sweep_ins(jit_State *J)
 {
-  IRIns *ir, *irbase = IR(REF_BASE);
-  for (ir = IR(J->cur.nins-1) ; ir >= irbase; ir--) {
+  IRIns *ir, *irfirst = IR(J->cur.nk);
+  for (ir = IR(J->cur.nins-1) ; ir >= irfirst; ir--) {
     switch (ir->o) {
     case IR_ASTORE: case IR_HSTORE: case IR_FSTORE: case IR_XSTORE: {
       IRIns *ira = sink_checkalloc(J, ir);
@@ -215,12 +215,6 @@ static void sink_sweep_ins(jit_State *J)
       ir->prev = REGSP_INIT;
       break;
     }
-  }
-  for (ir = IR(J->cur.nk); ir < irbase; ir++) {
-    irt_clearmark(ir->t);
-    ir->prev = REGSP_INIT;
-    if (irt_is64(ir->t) && ir->o != IR_KNULL)
-      ir++;
   }
 }
 
